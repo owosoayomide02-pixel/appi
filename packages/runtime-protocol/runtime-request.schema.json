@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://appi.dev/schemas/runtime-request.json",
+  "title": "AppiRuntimeRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task_id", "step_id", "tool", "input"],
+  "properties": {
+    "task_id": { "type": "string", "minLength": 1 },
+    "step_id": { "type": "string", "minLength": 1 },
+    "tool": { "type": "string" },
+    "permission_token": { "type": "string" },
+    "input": { "type": "object" },
+    "timeout": { "type": "integer", "minimum": 1, "maximum": 600 },
+    "timeout_seconds": { "type": "integer", "minimum": 1, "maximum": 600 },
+    "capability": { "type": "string" },
+    "allowed_roots": { "type": "array", "items": { "type": "string" } }
+  }
+}

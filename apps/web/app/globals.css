@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f4f1ea;
+  --bg-elevated: rgba(255, 255, 255, 0.72);
+  --bg-panel: #fffcf7;
+  --fg: #16141c;
+  --fg-muted: #5c5866;
+  --line: rgba(22, 20, 28, 0.1);
+  --accent: #2f4fe0;
+  --accent-soft: rgba(47, 79, 224, 0.12);
+  --ok: #0f7a4e;
+  --warn: #9a6400;
+  --danger: #c42b2b;
+  --glass: blur(18px);
+}
+
+html.dark {
+  --bg: #09090c;
+  --bg-elevated: rgba(18, 18, 24, 0.72);
+  --bg-panel: #121218;
+  --fg: #f4f1ea;
+  --fg-muted: #9a96a3;
+  --line: rgba(244, 241, 234, 0.1);
+  --accent: #8da2ff;
+  --accent-soft: rgba(141, 162, 255, 0.14);
+  --ok: #5dcca0;
+  --warn: #e3b341;
+  --danger: #ff6b6b;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-syne);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  background-image:
+    radial-gradient(1200px 600px at 10% -10%, var(--accent-soft), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(255, 255, 255, 0.04), transparent 50%);
+}
+
+.glass {
+  background: var(--bg-elevated);
+  backdrop-filter: var(--glass);
+  border: 1px solid var(--line);
+}
+
+.cmd-shadow {
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.18);
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 99px; }

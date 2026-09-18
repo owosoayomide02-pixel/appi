@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://appi.dev/schemas/tool-request.json",
+  "title": "AppiToolRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task_id", "step_id", "tool", "input"],
+  "properties": {
+    "task_id": { "type": "string", "minLength": 1 },
+    "step_id": { "type": "string", "minLength": 1 },
+    "tool": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+    },
+    "input": { "type": "object" },
+    "timeout_seconds": { "type": "integer", "minimum": 1, "maximum": 600 },
+    "permission_token": { "type": "string" },
+    "allowed_roots": { "type": "array", "items": { "type": "string" } }
+  }
+}

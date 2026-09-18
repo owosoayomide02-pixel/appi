@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://appi.dev/schemas/permission.json",
+  "title": "AppiPermission",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["subject", "resource", "scope", "actions"],
+  "properties": {
+    "subject": { "type": "string", "minLength": 1 },
+    "resource": { "type": "string", "minLength": 1 },
+    "scope": { "type": "string" },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "expires_at": { "type": ["string", "null"], "format": "date-time" },
+    "requires_confirmation": { "type": "boolean" },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "one_time",
+        "session",
+        "time_limited",
+        "permanent",
+        "amount_limited",
+        "resource_limited"
+      ]
+    },
+    "max_amount": { "type": ["number", "null"] },
+    "currency": { "type": ["string", "null"] },
+    "merchant_type": { "type": ["string", "null"] }
+  }
+}
