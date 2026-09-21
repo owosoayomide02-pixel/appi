@@ -2,35 +2,32 @@ APPI for Windows
 Created by MELIX STUDIOS
 
 This folder is the Windows assistant (Appi.exe).
-It pairs to the APPI website / operator running on this PC.
+It pairs to your Appi account on the live site.
 
 Website
-  Product site:  http://localhost:3000
-  Operator:      http://localhost:3000/app
-  Devices page:  http://localhost:3000/device
+  Product site:  https://appi-project01.netlify.app
+  Operator:      https://appi-project01.netlify.app/app
+  Devices page:  https://appi-project01.netlify.app/device
 
 Install
 1. Unzip this folder anywhere, for example Desktop\Appi.
-2. Make sure the APPI brain + website are running
-   (from the APPI source folder: scripts\preview-windows.ps1
-    or scripts\dev.ps1 -All).
-3. Double-click Appi.exe. Do not Run as administrator.
-4. Open http://localhost:3000/device and create a pairing code.
-5. Pair once:
+2. Open the Appi folder (the one that contains Appi.exe).
+3. Do not Run as administrator.
+4. Open https://appi-project01.netlify.app/device , sign in, create a pairing code.
+5. In PowerShell in this folder, pair once:
 
-   Appi.exe pair --code 123456
+   .\Appi.exe pair --code 123456
 
 6. Then start it normally:
 
-   Appi.exe
+   .\Appi.exe
 
 Optional autostart at login:
 
-   Appi.exe autostart on
+   .\Appi.exe autostart on
 
 Voice: say Appi, wait for the greeting, then speak your command.
 Ctrl+Shift+A if the wake word misses.
 
-This package does not include API keys.
-Secrets live in the APPI source folder as .env (never ship real keys inside the exe).
-Pair Appi.exe to your APPI account after the website is up.
+A local .env next to Appi.exe points at the production API.
+Do not put API keys in this folder.

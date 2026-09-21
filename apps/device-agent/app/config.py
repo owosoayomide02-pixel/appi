@@ -5,14 +5,24 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def _env_files() -> tuple[str, ...]:
-    """Prefer the monorepo root `.env`, then local fallbacks."""
+    """Prefer `.env` next to Appi.exe (frozen), then monorepo / cwd fallbacks."""
+    import sys
+
+    ordered: list[Path] = []
+    if getattr(sys, "frozen", False):
+        ordered.append(Path(sys.executable).resolve().parent / ".env")
     here = Path(__file__).resolve()
-    root = here.parents[3]  # …/APPI-0.1.0/.env
-    package = here.parents[2]  # …/apps/device-agent
-    cwd = Path.cwd()
-    ordered = [root / ".env", package / ".env", cwd / ".env"]
+    try:
+        ordered.append(here.parents[3] / ".env")  # monorepo root
+    except IndexError:
+        pass
+    try:
+        ordered.append(here.parents[2] / ".env")  # apps/device-agent
+    except IndexError:
+        pass
+    ordered.append(Path.cwd() / ".env")
     found = [str(p) for p in ordered if p.is_file()]
-    return tuple(found) if found else (str(root / ".env"),)
+    return tuple(dict.fromkeys(found)) if found else (str(ordered[0]),)
 
 
 class Settings(BaseSettings):

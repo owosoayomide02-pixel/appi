@@ -238,10 +238,24 @@ async def pair(code: str) -> None:
         "runtime_version": RUNTIME_VERSION,
         "capabilities": desktop_capabilities(platform),
     }
-    async with httpx.AsyncClient(timeout=20) as client:
-        response = await client.post(url, json=body)
-        response.raise_for_status()
-        data = response.json()
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.post(url, json=body)
+            response.raise_for_status()
+            data = response.json()
+    except httpx.ConnectError:
+        print(f"Could not reach the Appi API at {settings.api_base_url}.")
+        print("Make sure .env next to Appi.exe has DEVICE_AGENT_API_URL=https://appi-6kfe.onrender.com")
+        raise SystemExit(1) from None
+    except httpx.HTTPStatusError as exc:
+        detail = ""
+        try:
+            detail = exc.response.json().get("detail") or ""
+        except Exception:
+            detail = exc.response.text[:200]
+        print(f"Pairing failed ({exc.response.status_code}): {detail or exc}")
+        print("Open https://appi-project01.netlify.app/device , create a fresh code, and try again.")
+        raise SystemExit(1) from None
     save_identity(
         {
             "device_id": data["device_id"],
@@ -251,6 +265,7 @@ async def pair(code: str) -> None:
         }
     )
     print(f"Paired as {data['device_id']} ({platform} runtime {RUNTIME_VERSION})")
+    print(f"Next: run Appi.exe, then open {settings.dashboard_url}")
 
 
 async def _submit_voice_command(text: str) -> dict[str, Any]:

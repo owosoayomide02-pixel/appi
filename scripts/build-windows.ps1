@@ -28,10 +28,14 @@ if (-not (Test-Path $exe)) {
 $readmeSrc = Join-Path $Root "packaging\windows\README.txt"
 Copy-Item $readmeSrc (Join-Path $out "README.txt") -Force
 
+$envSrc = Join-Path $Root "packaging\windows\dotenv.production"
+Copy-Item $envSrc (Join-Path $out ".env") -Force
+
 # Zip for distribution
 $zip = Join-Path $dist "Appi-windows.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
-Compress-Archive -Path (Join-Path $out "*") -DestinationPath $zip -Force
+# Zip the Appi folder itself so unzip yields Appi\Appi.exe (clear path)
+Compress-Archive -Path $out -DestinationPath $zip -Force
 
 Write-Host ""
 Write-Host "Windows assistant: $exe"
@@ -39,8 +43,8 @@ Write-Host "Zip package:       $zip"
 Write-Host ""
 Write-Host "Install / pair:"
 Write-Host "  1. Unzip anywhere (not as Administrator)."
-Write-Host "  2. Open http://localhost:3000/device → Generate pairing code"
-Write-Host "  3. Appi.exe pair --code 123456"
-Write-Host "  4. Appi.exe"
-Write-Host "  Operator UI: http://localhost:3000/app"
-Write-Host "  Autostart:   Appi.exe autostart on"
+Write-Host "  2. Open https://appi-project01.netlify.app/device → Generate pairing code"
+Write-Host "  3. cd into the Appi folder, then:  .\Appi.exe pair --code 123456"
+Write-Host "  4. .\Appi.exe"
+Write-Host "  Operator UI: https://appi-project01.netlify.app/app"
+Write-Host "  Autostart:   .\Appi.exe autostart on"
