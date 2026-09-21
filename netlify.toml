@@ -1,5 +1,5 @@
 # Netlify: Next.js website + operator (apps/web)
-# FastAPI brain must be hosted separately; set NEXT_PUBLIC_API_URL in Netlify env.
+# FastAPI brain is on Render — only put NEXT_PUBLIC_* vars in Netlify.
 
 [build]
   base = "apps/web"
@@ -7,19 +7,10 @@
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
   NEXT_TELEMETRY_DISABLED = "1"
+  # Public client values are intentionally in the JS bundle; omit from secrets scan.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,NEXT_PUBLIC_API_URL,NEXT_PUBLIC_GITHUB_REPO,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY,NEXT_PUBLIC_DOWNLOAD_WINDOWS_URL,NEXT_PUBLIC_DOWNLOAD_MACOS_URL,NEXT_PUBLIC_DOWNLOAD_LINUX_URL,SUPABASE_URL,SUPABASE_ANON_KEY,API_HOST,RUNTIME_VERSION,JWT_EXPIRE_MINUTES"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Production site: https://appi-project01.netlify.app
-# Set in Netlify UI → Site settings → Environment variables:
-#   NEXT_PUBLIC_APP_URL=https://appi-project01.netlify.app
-#   NEXT_PUBLIC_API_URL=https://your-api.example.com
-#   NEXT_PUBLIC_SUPABASE_URL=...
-#   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-#   NEXT_PUBLIC_GITHUB_REPO=owosoayomide02-pixel/appi
-#   NEXT_PUBLIC_DOWNLOAD_WINDOWS_URL=...
-#   NEXT_PUBLIC_DOWNLOAD_MACOS_URL=...
-#   NEXT_PUBLIC_DOWNLOAD_LINUX_URL=...
