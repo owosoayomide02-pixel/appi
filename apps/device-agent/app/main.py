@@ -353,15 +353,34 @@ async def _voice_loop() -> None:
     print(f"Speaking voice: {voice_label}. Recognition language: {culture_label}")
     print(f"Microphone state: {pipeline.status.mic_state.value}")
     print("Say Appi, wait for the greeting, then a short command such as open Chrome.")
+    try:
+        from appi_voice.quantum_core import set_viz_state, start_quantum_core
+
+        if start_quantum_core():
+            print("Quantum Core visualizer online (cyan / iris).")
+        else:
+            print("Quantum Core skipped (pip install PyQt6 pyaudio numpy).")
+
+            def set_viz_state(_s: str = "idle") -> None:
+                return None
+    except Exception as exc:
+        print(f"Quantum Core unavailable: {exc}")
+
+        def set_viz_state(_s: str = "idle") -> None:
+            return None
     while not STOP:
         if MUTED or KILLED or PAUSED or pipeline.status.mic_state == MicState.OFF:
+            set_viz_state("idle")
             await asyncio.sleep(0.4)
             continue
         pipeline.config.ack_text = greeting(name or await _user_display_name())
+        set_viz_state("listening")
         woke = await asyncio.to_thread(pipeline.wait_for_wake, 8.0)
         if not woke:
             continue
+        set_viz_state("speaking")
         await asyncio.to_thread(pipeline.acknowledge)
+        set_viz_state("listening")
         command = sanitize_heard(await asyncio.to_thread(pipeline.capture_command, 10.0))
         heard = pipeline.last_recognition or {}
         if not command:
@@ -371,15 +390,21 @@ async def _voice_loop() -> None:
                 print(f"Ignored low-confidence speech ({conf}): {raw}")
             else:
                 print("No command heard after greeting.")
+            set_viz_state("speaking")
             await asyncio.to_thread(pipeline.respond, "Sorry, say that again.")
+            set_viz_state("idle")
             continue
         print(f"Voice command ({heard.get('confidence', '?')} {heard.get('source', '')}): {command}")
         local = local_reply(command, name)
         if local:
+            set_viz_state("speaking")
             await asyncio.to_thread(pipeline.respond, local)
+            set_viz_state("idle")
             continue
+        set_viz_state("thinking")
         result = await _submit_voice_command(command)
         status = result.get("status")
+        set_viz_state("speaking")
         if status == "WAITING_FOR_APPROVAL":
             await asyncio.to_thread(pipeline.respond, "I need your approval on the dashboard.")
         elif status == "COMPLETED":
@@ -389,6 +414,7 @@ async def _voice_loop() -> None:
             await asyncio.to_thread(pipeline.respond, f"I could not complete that. {follow_up(name)}")
         else:
             await asyncio.to_thread(pipeline.respond, "Working on it.")
+        set_viz_state("idle")
 
 
 async def _session() -> None:

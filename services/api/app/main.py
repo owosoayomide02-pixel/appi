@@ -15,9 +15,11 @@ from app.deps import rate_limit
 from app.routers import (
     audit,
     auth,
+    auth_oauth,
     connections,
     devices,
     diffs,
+    downloads,
     kill_switch,
     memory,
     notifications,
@@ -81,6 +83,8 @@ def create_app() -> FastAPI:
         return JSONResponse({"detail": redact_text(str(exc))}, status_code=500)
 
     app.include_router(auth.router)
+    app.include_router(auth_oauth.router)
+    app.include_router(downloads.router)
     app.include_router(tasks.router)
     app.include_router(devices.router)
     app.include_router(kill_switch.router)

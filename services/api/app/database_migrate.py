@@ -14,6 +14,10 @@ def ensure_sqlite_columns(sync_conn: Connection) -> None:
     inspector = inspect(sync_conn)
     tables = set(inspector.get_table_names())
     additions: dict[str, list[tuple[str, str]]] = {
+        "users": [
+            ("oauth_provider", "VARCHAR(32)"),
+            ("oauth_subject", "VARCHAR(160)"),
+        ],
         "devices": [
             ("platform", "VARCHAR(32) DEFAULT 'windows'"),
             ("runtime_version", "VARCHAR(32) DEFAULT '0.2.0'"),

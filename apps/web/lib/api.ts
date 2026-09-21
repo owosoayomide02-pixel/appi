@@ -2,14 +2,22 @@ import { API_URL } from "./env";
 
 export { API_URL, APP_URL } from "./env";
 
-export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+function withAuthHeaders(init: RequestInit = {}): Headers {
   const headers = new Headers(init.headers);
   if (!(init.body instanceof FormData) && !headers.has("Content-Type") && init.body) {
     headers.set("Content-Type", "application/json");
   }
+  if (typeof window !== "undefined" && !headers.has("Authorization")) {
+    const token = localStorage.getItem("appi_access_token");
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+  }
+  return headers;
+}
+
+export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
-    headers,
+    headers: withAuthHeaders(init),
     credentials: "include",
   });
   if (!response.ok) {
@@ -48,6 +56,8 @@ function formatDetail(detail: unknown, status: number): string {
 
 export function wsUrl(path: string, token?: string): string {
   const base = API_URL.replace("http://", "ws://").replace("https://", "wss://");
-  const qs = token ? `?token=${encodeURIComponent(token)}` : "";
+  const stored = typeof window !== "undefined" ? localStorage.getItem("appi_access_token") : null;
+  const use = token || stored || "";
+  const qs = use ? `?token=${encodeURIComponent(use)}` : "";
   return `${base}${path}${qs}`;
 }

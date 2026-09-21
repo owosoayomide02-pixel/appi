@@ -20,6 +20,10 @@ tray = [
   "pystray>=0.19.5",
   "pillow>=10.0.0",
 ]
+voice_ui = [
+  "PyQt6>=6.6.0",
+  "numpy>=1.26.0",
+]
 
 [project.scripts]
 appi-agent = "app.main:main"

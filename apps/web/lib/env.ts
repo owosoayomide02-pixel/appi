@@ -19,10 +19,17 @@ export const SUPABASE_URL = (
 
 export const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
   process.env.SUPABASE_ANON_KEY ||
   "";
 
 export const WEB_PUSH_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY ||
   process.env.WEB_PUSH_VAPID_PUBLIC_KEY ||
+  "";
+
+/** Optional; installers themselves come from the API (reads root `.env`). */
+export const GITHUB_REPO =
+  process.env.NEXT_PUBLIC_GITHUB_REPO ||
+  process.env.GITHUB_REPO ||
   "";

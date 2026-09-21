@@ -1,4 +1,20 @@
-from app.routers import audit, auth, connections, devices, diffs, kill_switch, memory, notifications, onboarding, permissions, projects, runtime, tasks, ws
+from app.routers import (
+    audit,
+    auth,
+    connections,
+    devices,
+    diffs,
+    downloads,
+    kill_switch,
+    memory,
+    notifications,
+    onboarding,
+    permissions,
+    projects,
+    runtime,
+    tasks,
+    ws,
+)
 
 __all__ = [
     "audit",
@@ -6,6 +22,7 @@ __all__ = [
     "connections",
     "devices",
     "diffs",
+    "downloads",
     "kill_switch",
     "memory",
     "notifications",
