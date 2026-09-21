@@ -5,14 +5,25 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def _env_files() -> tuple[str, ...]:
-    """Prefer the monorepo root `.env`, then local fallbacks."""
+    """Prefer monorepo root `.env` locally; on Docker/Render rely on process env."""
     here = Path(__file__).resolve()
-    root = here.parents[3]  # …/APPI-0.1.0/.env
-    package = here.parents[2]  # …/services/api
-    cwd = Path.cwd()
-    ordered = [root / ".env", package / ".env", cwd / ".env"]
-    found = [str(p) for p in ordered if p.is_file()]
-    return tuple(found) if found else (str(root / ".env"),)
+    candidates: list[Path] = [Path.cwd() / ".env"]
+    # Safe walk — Docker layout is /app/app/config.py (shallow), local is deeper.
+    for parent in list(here.parents)[:6]:
+        candidates.append(parent / ".env")
+    found: list[str] = []
+    seen: set[str] = set()
+    for path in candidates:
+        try:
+            resolved = str(path.resolve())
+        except OSError:
+            continue
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        if path.is_file():
+            found.append(resolved)
+    return tuple(found)
 
 
 class Settings(BaseSettings):
