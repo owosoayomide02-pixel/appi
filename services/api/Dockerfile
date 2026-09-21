@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PYTHONPATH=/app
 
-COPY services/api/pyproject.toml services/api/README.md ./
+COPY services/api/pyproject.toml ./
 COPY services/api/app ./app
 
 RUN pip install --upgrade pip \
