@@ -91,13 +91,20 @@ export function PlatformInstall({ preferred, showAll = true, compact = false, pa
         </h2>
         <p className="mt-2 text-sm text-[var(--fg-muted)]">{primary.blurb}</p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <a
-            href={primary.url}
-            className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm text-white"
-            download={primary.filename}
-          >
-            Download for {primary.label}
-          </a>
+          {primary.url && primary.available !== false ? (
+            <a
+              href={primary.url}
+              className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm text-white"
+              download={primary.filename}
+              rel="noopener noreferrer"
+            >
+              Download for {primary.label}
+            </a>
+          ) : (
+            <span className="rounded-full bg-[var(--line)] px-5 py-3 text-sm text-[var(--fg-muted)]">
+              Installer not published yet for {primary.label}
+            </span>
+          )}
           {showAll && platforms.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {platforms.map((p) => (

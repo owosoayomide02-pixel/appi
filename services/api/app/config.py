@@ -108,7 +108,9 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = 120
 
     # Public installers — set in root `.env` (DOWNLOAD_* / GITHUB_REPO)
-    github_repo: str = ""
+    github_repo: str = "owosoayomide02-pixel/appi"
+    github_token: str = ""
+    download_windows_tag: str = "v0.3.0"
     download_windows_url: str = ""
     download_macos_url: str = ""
     download_linux_url: str = ""
@@ -119,25 +121,26 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _resolve_download_urls(self) -> "Settings":
-        """Prefer explicit DOWNLOAD_* from `.env`; only invent URLs if GITHUB_REPO is set."""
-        repo = (self.next_public_github_repo or self.github_repo or "").strip()
+        """Prefer explicit DOWNLOAD_* from `.env`; invent GitHub URLs from repo otherwise."""
+        repo = (self.next_public_github_repo or self.github_repo or "owosoayomide02-pixel/appi").strip()
         self.github_repo = repo
-        release = f"https://github.com/{repo}/releases/latest/download" if repo else ""
-        raw = f"https://raw.githubusercontent.com/{repo}/main" if repo else ""
+        tag = (self.download_windows_tag or "v0.3.0").strip()
+        release = f"https://github.com/{repo}/releases/download/{tag}"
+        raw = f"https://raw.githubusercontent.com/{repo}/main"
         self.download_windows_url = (
             self.download_windows_url
             or self.next_public_download_windows_url
-            or (f"{release}/Appi-windows.zip" if release else "")
+            or f"{release}/Appi-windows.zip"
         ).strip()
         self.download_macos_url = (
             self.download_macos_url
             or self.next_public_download_macos_url
-            or (f"{raw}/scripts/setup-macos.sh" if raw else "")
+            or f"{raw}/scripts/setup-macos.sh"
         ).strip()
         self.download_linux_url = (
             self.download_linux_url
             or self.next_public_download_linux_url
-            or (f"{raw}/scripts/setup-linux.sh" if raw else "")
+            or f"{raw}/scripts/setup-linux.sh"
         ).strip()
         return self
 
