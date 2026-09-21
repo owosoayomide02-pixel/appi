@@ -33,6 +33,47 @@ function pairCommand(template: string, code: string): string {
   return (template || "pair --code {code}").replace("{code}", code || "123456");
 }
 
+const FALLBACK_PLATFORMS: Asset[] = [
+  {
+    id: "windows",
+    label: "Windows",
+    kind: "exe",
+    url: "https://github.com/owosoayomide02-pixel/appi/releases/download/v0.3.0/Appi-windows.zip",
+    filename: "Appi-windows.zip",
+    available: true,
+    blurb: "Download Appi.exe (zip). Unzip, then pair with your account.",
+    pair_template: "Appi.exe pair --code {code}",
+  },
+  {
+    id: "macos",
+    label: "macOS",
+    kind: "macos",
+    url: "https://raw.githubusercontent.com/owosoayomide02-pixel/appi/main/scripts/setup-macos.sh",
+    filename: "setup-macos.sh",
+    available: true,
+    blurb: "Run the macOS setup script on a Mac (LaunchAgent).",
+    pair_template: "python3 -m app.main pair --code {code}",
+  },
+  {
+    id: "linux",
+    label: "Linux",
+    kind: "linux",
+    url: "https://raw.githubusercontent.com/owosoayomide02-pixel/appi/main/scripts/setup-linux.sh",
+    filename: "setup-linux.sh",
+    available: true,
+    blurb: "Run the Linux setup script (systemd user service).",
+    pair_template: "python3 -m app.main pair --code {code}",
+  },
+];
+
+function withFallbackUrls(platforms: Asset[]): Asset[] {
+  return platforms.map((p) => {
+    if (p.url) return p;
+    const fb = FALLBACK_PLATFORMS.find((f) => f.id === p.id);
+    return fb ? { ...p, url: fb.url, available: true } : p;
+  });
+}
+
 export function PlatformInstall({ preferred, showAll = true, compact = false, pairingCode }: Props) {
   const [os, setOs] = useState<PlatformId>("unknown");
   const [manifest, setManifest] = useState<Manifest | null>(null);
@@ -53,13 +94,29 @@ export function PlatformInstall({ preferred, showAll = true, compact = false, pa
         if (!res.ok) throw new Error(`Could not load installers (${res.status})`);
         const data = (await res.json()) as Manifest;
         if (!cancelled) {
-          setManifest(data);
+          const platforms = withFallbackUrls(data.platforms || []);
+          const recommended =
+            platforms.find((p) => p.id === data.recommended?.id) ||
+            platforms[0] ||
+            FALLBACK_PLATFORMS[0];
+          setManifest({
+            ...data,
+            platforms,
+            recommended,
+          });
           if (!platformFromQuery(preferred || null) && data.detected && data.detected !== "unknown") {
             setOs(data.detected as PlatformId);
           }
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not load installers from env");
+        if (!cancelled) {
+          setManifest({
+            detected: "unknown",
+            recommended: FALLBACK_PLATFORMS[0],
+            platforms: FALLBACK_PLATFORMS,
+          });
+          setError(err instanceof Error ? err.message : "Could not load installers from env");
+        }
       }
     })();
     return () => {
