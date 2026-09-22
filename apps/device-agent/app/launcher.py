@@ -9,6 +9,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+from urllib.parse import urlparse
 
 CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000) if sys.platform.startswith("win") else 0
 
@@ -77,12 +78,26 @@ def _python() -> str:
     return python
 
 
+def _is_remote_api(url: str) -> bool:
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if parsed.scheme == "https":
+        return True
+    return host not in {"127.0.0.1", "localhost", ""}
+
+
 def ensure_stack() -> None:
+    """Start local API/web only for monorepo preview. Frozen builds talk to production."""
     from app.config import settings
 
     api_host = settings.resolved_api_host
     api_port = settings.resolved_api_port
     web_port = settings.web_port
+    api_url = settings.api_base_url
+
+    if getattr(sys, "frozen", False) or _is_remote_api(api_url):
+        _log(f"production mode → {api_url}")
+        return
 
     api = REPO_ROOT / "services" / "api"
     web = REPO_ROOT / "apps" / "web"
@@ -90,7 +105,7 @@ def ensure_stack() -> None:
         if not port_open(api_port, host=api_host):
             _popup(
                 "Appi",
-                "This Appi shortcut needs the APPI folder on this PC.",
+                "Could not find a local Appi API. For the desktop zip, set DEVICE_AGENT_API_URL in .env next to Appi.exe.",
             )
             sys.exit(2)
         return
@@ -119,6 +134,21 @@ def ensure_stack() -> None:
             sys.exit(2)
 
 
+def _ensure_installed_copy() -> None:
+    """Copy frozen folder into LocalAppData and refresh shortcuts (silent)."""
+    if not getattr(sys, "frozen", False):
+        return
+    try:
+        from app.install_windows import install, is_installed_copy
+
+        if is_installed_copy():
+            return
+        info = install(enable_login_start=True)
+        _log(f"installed to {info.get('exe')}")
+    except Exception as exc:
+        _log(f"install skipped: {exc}")
+
+
 def _start_agent() -> None:
     os.environ["APPI_SKIP_VAULT_PROMPT"] = "1"
     os.environ["APPI_DESKTOP"] = "1"
@@ -128,8 +158,36 @@ def _start_agent() -> None:
     agent_main()
 
 
+def _resolve_start_url() -> str:
+    from app.config import settings
+    from app.identity import load_identity
+
+    if load_identity():
+        return settings.dashboard_url
+    return settings.device_page_url
+
+
+def _maybe_pair() -> None:
+    from app.config import settings
+    from app.identity import load_identity
+
+    if load_identity():
+        return
+    try:
+        from app.desktop.pair_dialog import prompt_pair_code
+
+        prompt_pair_code(device_page_url=settings.device_page_url)
+    except Exception as exc:
+        _log(f"pair dialog failed: {exc}")
+
+
 def main() -> None:
-    os.chdir(REPO_ROOT / "apps" / "device-agent")
+    agent_dir = REPO_ROOT / "apps" / "device-agent"
+    if agent_dir.is_dir():
+        os.chdir(agent_dir)
+    elif getattr(sys, "frozen", False):
+        os.chdir(Path(sys.executable).resolve().parent)
+
     if str(REPO_ROOT / "apps" / "runtime-core") not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / "apps" / "runtime-core"))
         sys.path.insert(0, str(REPO_ROOT / "services" / "voice"))
@@ -137,13 +195,15 @@ def main() -> None:
     from app.desktop.app_window import ping_existing, run_desktop, show_splash, request_quit
 
     _log("starting")
+    _ensure_installed_copy()
+
     existing = ping_existing()
     if existing.get("ok") and existing.get("shown"):
         _log("already running, shown existing window")
         return
     if existing.get("ok"):
         _log("runtime up, opening window")
-        run_desktop()
+        run_desktop(url=_resolve_start_url())
         return
 
     splash = show_splash()
@@ -154,6 +214,9 @@ def main() -> None:
             splash.destroy()
         except Exception:
             pass
+
+    _maybe_pair()
+
     try:
         from app.vault_prompt import prompt_if_empty
 
@@ -169,9 +232,10 @@ def main() -> None:
 
     threading.Thread(target=_start_agent, daemon=True).start()
     wait_for_port(47821, 8)
-    _log("opening Appi window")
+    start_url = _resolve_start_url()
+    _log(f"opening Appi window → {start_url}")
     try:
-        run_desktop(on_exit=on_exit)
+        run_desktop(url=start_url, on_exit=on_exit)
     except Exception as exc:
         _log(f"window failed: {exc}")
         _popup("Appi", f"Could not open the Appi window.\n{exc}")

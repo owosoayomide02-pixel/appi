@@ -246,7 +246,7 @@ async def pair(code: str) -> None:
     except httpx.ConnectError:
         print(f"Could not reach the Appi API at {settings.api_base_url}.")
         print("Make sure .env next to Appi.exe has DEVICE_AGENT_API_URL=https://appi-6kfe.onrender.com")
-        raise SystemExit(1) from None
+        raise RuntimeError(f"Could not reach the Appi API at {settings.api_base_url}") from None
     except httpx.HTTPStatusError as exc:
         detail = ""
         try:
@@ -255,7 +255,7 @@ async def pair(code: str) -> None:
             detail = exc.response.text[:200]
         print(f"Pairing failed ({exc.response.status_code}): {detail or exc}")
         print("Open https://appi-project01.netlify.app/device , create a fresh code, and try again.")
-        raise SystemExit(1) from None
+        raise RuntimeError(detail or f"Pairing failed ({exc.response.status_code})") from None
     save_identity(
         {
             "device_id": data["device_id"],
@@ -620,7 +620,10 @@ def main() -> None:
     voice_set.add_argument("--culture", default="", help="Recognition language, e.g. en-GB or en-US")
     args = parser.parse_args()
     if args.cmd == "pair":
-        asyncio.run(pair(args.code))
+        try:
+            asyncio.run(pair(args.code))
+        except RuntimeError:
+            raise SystemExit(1) from None
         return
     if args.cmd == "open":
         from app.launcher import main as open_appi

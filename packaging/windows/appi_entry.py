@@ -1,4 +1,4 @@
-"""Frozen Windows entry. Double-click starts the background assistant."""
+"""Frozen Windows entry. Double-click opens the desktop Appi window."""
 
 from __future__ import annotations
 
@@ -14,10 +14,18 @@ sys.path.insert(0, str(base / "apps" / "device-agent"))
 sys.path.insert(0, str(base / "apps" / "runtime-core"))
 sys.path.insert(0, str(base / "services" / "voice"))
 
-if len(sys.argv) == 1:
-    sys.argv.append("serve")
 
-from app.main import main
+def _run() -> None:
+    # No args → desktop shell. CLI still works: Appi.exe pair|serve|install|…
+    if len(sys.argv) == 1:
+        from app.launcher import main as launcher_main
+
+        launcher_main()
+    else:
+        from app.main import main
+
+        main()
+
 
 if __name__ == "__main__":
-    main()
+    _run()

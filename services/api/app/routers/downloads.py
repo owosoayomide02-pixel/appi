@@ -61,7 +61,7 @@ async def download_manifest(request: Request) -> dict:
             url=win_url,
             filename="Appi-windows.zip",
             available=True,
-            blurb="Download Appi.exe (zip). Unzip, then pair with your account.",
+            blurb="Download the Appi desktop app (zip). Unzip, open Appi.exe, then pair with a Devices code.",
             pair_template="Appi.exe pair --code {code}",
         ),
         PlatformAsset(
@@ -71,7 +71,7 @@ async def download_manifest(request: Request) -> dict:
             url=mac_url,
             filename="setup-macos.sh",
             available=(_INSTALLERS / "setup-macos.sh").is_file(),
-            blurb="Run the macOS setup script on a Mac (LaunchAgent).",
+            blurb="Run the macOS setup script — installs Appi, connects to the live site, then pair.",
             pair_template="python3 -m app.main pair --code {code}",
         ),
         PlatformAsset(
@@ -81,7 +81,7 @@ async def download_manifest(request: Request) -> dict:
             url=linux_url,
             filename="setup-linux.sh",
             available=(_INSTALLERS / "setup-linux.sh").is_file(),
-            blurb="Run the Linux setup script (systemd user service).",
+            blurb="Run the Linux setup script — installs Appi, connects to the live site, then pair.",
             pair_template="python3 -m app.main pair --code {code}",
         ),
     ]

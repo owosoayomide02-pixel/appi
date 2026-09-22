@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Install the Appi desktop runtime on macOS (files, terminal, browser).
+# Install the Appi desktop runtime on macOS and connect it to the live site.
 # Safe to download and run alone — clones the agent from GitHub if needed.
-# Native TCC / App Intents / say-Appi wake word are not implemented yet.
 
 set -euo pipefail
 
@@ -13,14 +12,14 @@ fi
 REPO="${APPI_GITHUB_REPO:-owosoayomide02-pixel/appi}"
 BRANCH="${APPI_BRANCH:-main}"
 INSTALL_ROOT="${APPI_HOME:-$HOME/.appi}"
+APP_URL="${APPI_APP_URL:-https://appi-project01.netlify.app}"
+API_URL="${APPI_API_URL:-https://appi-6kfe.onrender.com}"
 
 resolve_agent() {
-  # Running from a full checkout: scripts/ -> repo root
   if [[ -f "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/apps/device-agent/pyproject.toml" ]]; then
     echo "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/apps/device-agent"
     return
   fi
-  # Already installed
   if [[ -f "$INSTALL_ROOT/apps/device-agent/pyproject.toml" ]]; then
     echo "$INSTALL_ROOT/apps/device-agent"
     return
@@ -47,6 +46,16 @@ fi
 
 AGENT="$(resolve_agent)"
 echo "Using agent at: $AGENT"
+
+mkdir -p "$INSTALL_ROOT"
+cat > "$INSTALL_ROOT/.env" <<EOF
+DEVICE_AGENT_API_URL=$API_URL
+APP_URL=$APP_URL
+NEXT_PUBLIC_APP_URL=$APP_URL
+NEXT_PUBLIC_API_URL=$API_URL
+EOF
+cp "$INSTALL_ROOT/.env" "$AGENT/.env" 2>/dev/null || true
+echo "Wrote production .env → $INSTALL_ROOT/.env"
 
 echo "Installing Appi device-agent dependencies..."
 "$PYTHON" -m pip install --user -e "$AGENT"
@@ -80,6 +89,13 @@ cat > "$PLIST" <<EOF
   <string>$HOME/Library/Logs/appi-runtime.log</string>
   <key>StandardErrorPath</key>
   <string>$HOME/Library/Logs/appi-runtime.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>DEVICE_AGENT_API_URL</key>
+    <string>$API_URL</string>
+    <key>APP_URL</key>
+    <string>$APP_URL</string>
+  </dict>
 </dict>
 </plist>
 EOF
@@ -92,9 +108,19 @@ echo "LaunchAgent loaded: dev.appi.runtime"
 (cd "$AGENT" && "$PYTHON" -m app.main autostart on) || true
 
 echo
-echo "macOS setup is ready."
-echo "Pair from https://appi-project01.netlify.app/device then run:"
+echo "Open Devices to create a pairing code: $APP_URL/device"
+if [[ -t 0 ]]; then
+  read -r -p "Paste pairing code (or Enter to skip): " CODE || true
+  if [[ -n "${CODE:-}" ]]; then
+    (cd "$AGENT" && DEVICE_AGENT_API_URL="$API_URL" APP_URL="$APP_URL" "$PYTHON" -m app.main pair --code "$CODE") || true
+  fi
+fi
+
+open "$APP_URL/app" 2>/dev/null || true
+
+echo
+echo "macOS Appi is connected to $APP_URL"
+echo "If you skipped pairing, run:"
 echo "  cd $AGENT"
-echo "  $PYTHON -m app.main pair --code YOUR_CODE"
+echo "  DEVICE_AGENT_API_URL=$API_URL $PYTHON -m app.main pair --code YOUR_CODE"
 echo "What works after pairing: files in approved folders, terminal, Playwright browser."
-echo "What does not work yet: wake word, TCC-gated Apple APIs, contacts, payments."

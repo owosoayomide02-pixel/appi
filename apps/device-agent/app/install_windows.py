@@ -106,7 +106,7 @@ def _create_shortcut(target: Path, *, shortcut: Path, arguments: str = "", workd
         f"$s.TargetPath = {_ps_quote(str(target))}; "
         f"$s.Arguments = {_ps_quote(arguments)}; "
         f"$s.WorkingDirectory = {_ps_quote(work)}; "
-        "$s.WindowStyle = 7; "
+        "$s.WindowStyle = 1; "
         "$s.Description = 'Appi'; "
         "$s.Save()"
     )
@@ -148,6 +148,11 @@ def install(*, enable_login_start: bool = True) -> dict[str, str]:
     dest.mkdir(parents=True, exist_ok=True)
     if src.resolve() != dest.resolve():
         shutil.copytree(src, dest, dirs_exist_ok=True)
+        # Keep production .env next to the installed exe
+        env_src = src / ".env"
+        if env_src.is_file():
+            shutil.copy2(env_src, dest / ".env")
+    # Windowed desktop app — no CLI args (entry runs launcher)
     shortcut = _create_shortcut(exe, shortcut=start_menu_dir() / "Appi.lnk", workdir=dest)
     desk = _create_shortcut(exe, shortcut=desktop_dir() / "Appi.lnk", workdir=dest)
     auto = ""
@@ -158,6 +163,8 @@ def install(*, enable_login_start: bool = True) -> dict[str, str]:
         if folder is not None:
             folder.mkdir(parents=True, exist_ok=True)
             starter = folder / "AppiRuntime.vbs"
+            # No "serve" arg — windowed entry opens the desktop shell (hides to tray).
+            # Use serve for login autostart so we don't pop a window every boot.
             starter.write_text(
                 "Option Explicit\r\n"
                 "Dim sh\r\n"

@@ -110,7 +110,7 @@ class Settings(BaseSettings):
     # Public installers — set in root `.env` (DOWNLOAD_* / GITHUB_REPO)
     github_repo: str = "owosoayomide02-pixel/appi"
     github_token: str = ""
-    download_windows_tag: str = "v0.3.0"
+    download_windows_tag: str = "v0.4.0"
     download_windows_url: str = ""
     download_macos_url: str = ""
     download_linux_url: str = ""

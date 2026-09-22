@@ -38,10 +38,10 @@ const FALLBACK_PLATFORMS: Asset[] = [
     id: "windows",
     label: "Windows",
     kind: "exe",
-    url: "https://github.com/owosoayomide02-pixel/appi/releases/download/v0.3.0/Appi-windows.zip",
+    url: "https://github.com/owosoayomide02-pixel/appi/releases/download/v0.4.0/Appi-windows.zip",
     filename: "Appi-windows.zip",
     available: true,
-    blurb: "Download Appi.exe (zip). Unzip, then pair with your account.",
+    blurb: "Download the Appi desktop app (zip). Unzip, open Appi.exe, then pair with a Devices code.",
     pair_template: "Appi.exe pair --code {code}",
   },
   {
@@ -51,7 +51,7 @@ const FALLBACK_PLATFORMS: Asset[] = [
     url: "https://raw.githubusercontent.com/owosoayomide02-pixel/appi/main/scripts/setup-macos.sh",
     filename: "setup-macos.sh",
     available: true,
-    blurb: "Run the macOS setup script on a Mac (LaunchAgent).",
+    blurb: "Run the macOS setup script — installs Appi, connects to the live site, then pair.",
     pair_template: "python3 -m app.main pair --code {code}",
   },
   {
@@ -61,7 +61,7 @@ const FALLBACK_PLATFORMS: Asset[] = [
     url: "https://raw.githubusercontent.com/owosoayomide02-pixel/appi/main/scripts/setup-linux.sh",
     filename: "setup-linux.sh",
     available: true,
-    blurb: "Run the Linux setup script (systemd user service).",
+    blurb: "Run the Linux setup script — installs Appi, connects to the live site, then pair.",
     pair_template: "python3 -m app.main pair --code {code}",
   },
 ];

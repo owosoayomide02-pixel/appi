@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_submodules, collect_all
 
 root = Path(SPECPATH).resolve().parents[1]
 sys.path[:0] = [
@@ -18,6 +18,16 @@ hidden = []
 for pkg in ("app", "appi_voice", "appi_runtime_core"):
     hidden.extend(collect_submodules(pkg))
 
+webview_datas, webview_binaries, webview_hidden = [], [], []
+try:
+    webview_datas, webview_binaries, webview_hidden = collect_all("webview")
+except Exception:
+    pass
+
+icon_path = root / "apps" / "web" / "public" / "brand" / "appi-logo-200.png"
+if not icon_path.is_file():
+    icon_path = None
+
 a = Analysis(
     [str(entry)],
     pathex=[
@@ -26,16 +36,23 @@ a = Analysis(
         str(root / "services" / "voice"),
         str(root / "packaging" / "windows"),
     ],
-    binaries=[],
-    datas=[(str(voice_scripts), "scripts")],
-    hiddenimports=hidden + [
+    binaries=list(webview_binaries),
+    datas=[(str(voice_scripts), "scripts")] + list(webview_datas),
+    hiddenimports=hidden
+    + list(webview_hidden)
+    + [
         "app.main",
+        "app.launcher",
+        "app.desktop.app_window",
+        "app.desktop.pair_dialog",
         "appi_voice.assistant",
         "appi_voice.pipeline",
         "appi_voice.windows_sapi",
         "appi_runtime_core.autostart",
         "pystray._win32",
         "playwright",
+        "webview",
+        "webview.platforms.edgechromium",
     ],
     hookspath=[],
     hooksconfig={},
@@ -54,8 +71,9 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=False,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
+    icon=str(icon_path) if icon_path else None,
 )
 coll = COLLECT(
     exe,

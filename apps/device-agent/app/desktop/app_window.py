@@ -19,6 +19,18 @@ def _dashboard_url() -> str:
         return "http://127.0.0.1:3000/app"
 
 
+def _start_url() -> str:
+    try:
+        from app.config import settings
+        from app.identity import load_identity
+
+        if load_identity():
+            return settings.dashboard_url
+        return settings.device_page_url
+    except Exception:
+        return _dashboard_url()
+
+
 DASHBOARD_URL = _dashboard_url()
 
 
@@ -131,14 +143,15 @@ def _run_control_panel(*, on_exit: Any) -> None:
         WINDOW = None
 
 
-def run_desktop(url: str = DASHBOARD_URL, *, on_exit: Any = None) -> None:
+def run_desktop(url: str | None = None, *, on_exit: Any = None) -> None:
+    target = url or _start_url()
     try:
         import webview  # noqa: F401
     except ImportError:
         _run_control_panel(on_exit=on_exit or (lambda: None))
         return
     try:
-        _run_webview(url)
+        _run_webview(target)
     except Exception:
         _run_control_panel(on_exit=on_exit or (lambda: None))
 

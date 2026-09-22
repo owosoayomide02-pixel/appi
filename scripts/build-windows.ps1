@@ -11,7 +11,7 @@ $py = Join-Path $Root ".venv\Scripts\python.exe"
 if (-not (Test-Path $py)) { $py = "python" }
 
 Write-Host "Installing PyInstaller extras..."
-& $py -m pip install --quiet pyinstaller pystray pillow
+& $py -m pip install --quiet pyinstaller pystray pillow pywebview
 
 $dist = Join-Path $Root "dist\windows"
 $work = Join-Path $dist "work"
@@ -43,8 +43,8 @@ Write-Host "Zip package:       $zip"
 Write-Host ""
 Write-Host "Install / pair:"
 Write-Host "  1. Unzip anywhere (not as Administrator)."
-Write-Host "  2. Open https://appi-project01.netlify.app/device → Generate pairing code"
-Write-Host "  3. cd into the Appi folder, then:  .\Appi.exe pair --code 123456"
-Write-Host "  4. .\Appi.exe"
+Write-Host "  2. Double-click Appi.exe - desktop window opens (no CMD)."
+Write-Host "  3. Pair with a code from https://appi-project01.netlify.app/device"
+Write-Host "  4. Or:  .\Appi.exe pair --code 123456"
 Write-Host "  Operator UI: https://appi-project01.netlify.app/app"
 Write-Host "  Autostart:   .\Appi.exe autostart on"
