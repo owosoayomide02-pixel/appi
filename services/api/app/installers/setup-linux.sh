@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Install the Appi desktop runtime on Linux (files, terminal, browser).
+# Install the Appi desktop runtime on Linux and connect it to the live site.
 # Safe to download and run alone — clones the agent from GitHub if needed.
-# Voice wake-word is Windows SAPI today — this setup starts with --no-voice.
 
 set -euo pipefail
 
@@ -13,6 +12,8 @@ fi
 REPO="${APPI_GITHUB_REPO:-owosoayomide02-pixel/appi}"
 BRANCH="${APPI_BRANCH:-main}"
 INSTALL_ROOT="${APPI_HOME:-$HOME/.appi}"
+APP_URL="${APPI_APP_URL:-https://appi-project01.netlify.app}"
+API_URL="${APPI_API_URL:-https://appi-6kfe.onrender.com}"
 
 resolve_agent() {
   if [[ -f "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/apps/device-agent/pyproject.toml" ]]; then
@@ -46,6 +47,16 @@ fi
 AGENT="$(resolve_agent)"
 echo "Using agent at: $AGENT"
 
+mkdir -p "$INSTALL_ROOT"
+cat > "$INSTALL_ROOT/.env" <<EOF
+DEVICE_AGENT_API_URL=$API_URL
+APP_URL=$APP_URL
+NEXT_PUBLIC_APP_URL=$APP_URL
+NEXT_PUBLIC_API_URL=$API_URL
+EOF
+cp "$INSTALL_ROOT/.env" "$AGENT/.env" 2>/dev/null || true
+echo "Wrote production .env → $INSTALL_ROOT/.env"
+
 echo "Installing Appi device-agent dependencies..."
 "$PYTHON" -m pip install --user -e "$AGENT"
 "$PYTHON" -m pip install --user httpx websockets pydantic-settings playwright
@@ -65,6 +76,8 @@ ExecStart=$PYTHON -m app.main serve --no-voice
 Restart=on-failure
 RestartSec=5
 Environment=PYTHONUNBUFFERED=1
+Environment=DEVICE_AGENT_API_URL=$API_URL
+Environment=APP_URL=$APP_URL
 
 [Install]
 WantedBy=default.target
@@ -82,9 +95,19 @@ else
 fi
 
 echo
-echo "Linux setup is ready."
-echo "Pair from https://appi-project01.netlify.app/device then run:"
+echo "Open Devices to create a pairing code: $APP_URL/device"
+if [[ -t 0 ]]; then
+  read -r -p "Paste pairing code (or Enter to skip): " CODE || true
+  if [[ -n "${CODE:-}" ]]; then
+    (cd "$AGENT" && DEVICE_AGENT_API_URL="$API_URL" APP_URL="$APP_URL" "$PYTHON" -m app.main pair --code "$CODE") || true
+  fi
+fi
+
+(xdg-open "$APP_URL/app" >/dev/null 2>&1 || true)
+
+echo
+echo "Linux Appi is connected to $APP_URL"
+echo "If you skipped pairing, run:"
 echo "  cd $AGENT"
-echo "  $PYTHON -m app.main pair --code YOUR_CODE"
+echo "  DEVICE_AGENT_API_URL=$API_URL $PYTHON -m app.main pair --code YOUR_CODE"
 echo "What works after pairing: files in approved folders, terminal, Playwright browser."
-echo "What does not work yet: wake word, clipboard (Windows-only this milestone), contacts, payments."
