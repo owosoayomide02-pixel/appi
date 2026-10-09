@@ -1,0 +1,4 @@
+DEVICE_AGENT_API_URL=https://appi-6kfe.onrender.com
+APP_URL=https://appi-project01.netlify.app
+NEXT_PUBLIC_APP_URL=https://appi-project01.netlify.app
+NEXT_PUBLIC_API_URL=https://appi-6kfe.onrender.com

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://appi.dev/schemas/runtime-response.json",
+  "title": "AppiRuntimeResponse",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["success"],
+  "properties": {
+    "success": { "type": "boolean" },
+    "platform": { "type": "string" },
+    "result": {},
+    "data": {},
+    "verification": { "type": ["object", "null"] },
+    "error": { "type": ["string", "null"] },
+    "error_code": { "type": ["string", "null"] },
+    "exit_code": { "type": ["integer", "null"] },
+    "stdout": { "type": "string" },
+    "stderr": { "type": "string" },
+    "verification_required": { "type": "boolean" }
+  }
+}

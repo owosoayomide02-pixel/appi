@@ -1,0 +1,13 @@
+[Unit]
+Description=Appi background runtime
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/appi/apps/device-agent
+ExecStart=/usr/bin/python3 -m app.main serve
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

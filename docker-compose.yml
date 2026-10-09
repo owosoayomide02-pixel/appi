@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: appi
+      POSTGRES_PASSWORD: appi
+      POSTGRES_DB: appi
+    ports:
+      - "5432:5432"
+    volumes:
+      - appi_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appi -d appi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  appi_pg:

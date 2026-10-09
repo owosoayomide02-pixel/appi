@@ -1,0 +1,23 @@
+# Phrases Windows Speech Recognition should prefer after "Appi".
+open chrome
+open notepad
+open files
+open calculator
+open settings
+open paint
+open edge
+open vscode
+list my files
+
+search the web
+what time is it
+system info
+how are you
+what can you do
+never mind
+thank you
+hello
+write a post
+post on instagram
+draft a tweet
+log in to gmail
