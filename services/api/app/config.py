@@ -107,11 +107,14 @@ class Settings(BaseSettings):
     runtime_version: str = "0.3.0"
     rate_limit_per_minute: int = 120
 
+<<<<<<< HEAD
     # LiveKit voice agent
     livekit_url: str = ""
     livekit_api_key: str = ""
     livekit_api_secret: str = ""
 
+=======
+>>>>>>> origin/main
     # Public installers — set in root `.env` (DOWNLOAD_* / GITHUB_REPO)
     github_repo: str = "owosoayomide02-pixel/appi"
     github_token: str = ""

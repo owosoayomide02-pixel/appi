@@ -28,8 +28,11 @@ from app.routers import (
     projects,
     runtime,
     tasks,
+<<<<<<< HEAD
     voice_chat,
     voice_token,
+=======
+>>>>>>> origin/main
     ws,
 )
 from app.integrations.supabase import supabase_status
@@ -63,7 +66,10 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
+<<<<<<< HEAD
         allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+=======
+>>>>>>> origin/main
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -71,8 +77,11 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def redact_errors(request: Request, call_next):  # type: ignore[no-untyped-def]
+<<<<<<< HEAD
         if request.method == "OPTIONS":
             return await call_next(request)
+=======
+>>>>>>> origin/main
         try:
             await rate_limit(request)
         except Exception as exc:
@@ -102,8 +111,11 @@ def create_app() -> FastAPI:
     app.include_router(onboarding.router)
     app.include_router(diffs.router)
     app.include_router(runtime.router)
+<<<<<<< HEAD
     app.include_router(voice_chat.router)
     app.include_router(voice_token.router)
+=======
+>>>>>>> origin/main
     app.include_router(ws.router)
 
     @app.get("/")

@@ -9,8 +9,11 @@ from app.security.tokens import decode_access_token
 
 
 async def rate_limit(request: Request) -> None:
+<<<<<<< HEAD
     if request.method == "OPTIONS":
         return
+=======
+>>>>>>> origin/main
     key = request.client.host if request.client else "unknown"
     auth = request.cookies.get("access_token") or request.headers.get("authorization", "")
     if auth:

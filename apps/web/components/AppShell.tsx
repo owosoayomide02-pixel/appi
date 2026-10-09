@@ -3,7 +3,10 @@
 import { KillSwitch } from "@/components/KillSwitch";
 import { NotificationBell } from "@/components/NotificationBell";
 import { Sidebar } from "@/components/Sidebar";
+<<<<<<< HEAD
 import { VoiceAgent } from "@/components/VoiceAgent";
+=======
+>>>>>>> origin/main
 import { api } from "@/lib/api";
 import { User } from "@/lib/types";
 import { Menu, Moon, Sun, X } from "lucide-react";
@@ -89,7 +92,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
         <main className="flex-1">{children}</main>
+<<<<<<< HEAD
         <VoiceAgent />
+=======
+>>>>>>> origin/main
       </div>
     </div>
   );
